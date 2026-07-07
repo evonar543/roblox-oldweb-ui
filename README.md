@@ -56,7 +56,9 @@ end)
 w1:Label("0 x 3 7")
 ```
 
-The full example is in [examples/example.client.lua](examples/example.client.lua).
+The short example is in [examples/example.client.lua](examples/example.client.lua).
+
+For a more complete test script that uses every control, multiple windows, default flags, custom flag tables, and returned `Set`/`Get` handles, use [examples/full-test.client.lua](examples/full-test.client.lua).
 
 ## API
 
