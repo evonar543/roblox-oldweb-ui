@@ -1,79 +1,126 @@
-# Roblox OldWeb UI
+# Polished Roblox UI
 
-A small raw-loadable Roblox Luau UI library inspired by late-90s/early-2000s personal homepages: chunky borders, fake visitor badges, under-construction energy, neon text, and cluttered table-box layout.
+A reusable Roblox Luau UI library for legitimate Roblox projects. It is built for in-experience menus, settings panels, debug tools, admin panels, configuration windows, and internal developer UI.
 
-## Load
+The main library is [src/PolishedUI.lua](src/PolishedUI.lua). It uses normal Roblox UI objects and is meant to be used as a `ModuleScript` with `require`.
+
+## Install In Roblox Studio
+
+1. Create a `ModuleScript` in `ReplicatedStorage`.
+2. Name it `PolishedUI`.
+3. Paste the contents of [src/PolishedUI.lua](src/PolishedUI.lua) into that ModuleScript.
+4. Create a `LocalScript` in `StarterPlayerScripts`, `StarterGui`, or another client-side location.
+5. Require the module:
 
 ```lua
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/evonar543/roblox-oldweb-ui/main/src/oldweb-ui.lua"))()
+local UI = require(game.ReplicatedStorage.PolishedUI)
 ```
 
-Use it in a Roblox place or environment where you are allowed to run the script.
-
-## Example
+## Basic Usage
 
 ```lua
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/evonar543/roblox-oldweb-ui/main/src/oldweb-ui.lua"))()
+local UI = require(game.ReplicatedStorage.PolishedUI)
 
-local w1 = library:Window("a")
+local Window = UI:CreateWindow({
+    Title = "Example UI",
+    Subtitle = "Settings and tools",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(620, 460),
+})
 
-w1:Button("Print Hi", function()
-    print("Hi")
-end)
+local MainTab = Window:CreateTab("Main")
+local Section = MainTab:CreateSection("Movement")
 
-w1:Slider("WalkSpeed", "WS", 16, 300, function(value)
-    local character = game.Players.LocalPlayer.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+Section:CreateToggle({
+    Name = "Sprint",
+    Key = "sprint",
+    Default = false,
+    Mode = "Toggle",
+    Callback = function(value)
+        print("Sprint:", value)
+    end,
+})
 
-    if humanoid then
-        humanoid.WalkSpeed = value
-    end
-end)
-
-w1:Slider("JumpPower", "JP", 50, 300, function(value)
-    local character = game.Players.LocalPlayer.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-    if humanoid then
-        humanoid.UseJumpPower = true
-        humanoid.JumpPower = value
-    end
-end, 100)
-
-w1:Toggle("Freeze", "frz", false, function(toggled)
-    local character = game.Players.LocalPlayer.Character
-    local root = character and character:FindFirstChild("HumanoidRootPart")
-
-    if root then
-        root.Anchored = toggled
-    end
-end)
-
-w1:Button("Destroy GUI", function()
-    w1:Destroy()
-end)
-
-w1:Label("0 x 3 7")
+Section:CreateSlider({
+    Name = "Walk Speed",
+    Key = "walkSpeed",
+    Min = 16,
+    Max = 100,
+    Default = 24,
+    Increment = 1,
+    Callback = function(value)
+        print("Walk Speed:", value)
+    end,
+})
 ```
 
-The short example is in [examples/example.client.lua](examples/example.client.lua).
+## Components
 
-For a more complete test script that uses every control, multiple windows, default flags, custom flag tables, and returned `Set`/`Get` handles, use [examples/full-test.client.lua](examples/full-test.client.lua).
+Supported in [src/PolishedUI.lua](src/PolishedUI.lua):
 
-## API
+- Windows with draggable title bars, minimize, close, open animation, sidebar, content area, and search
+- Tabs with active highlighting
+- Scrollable sections with optional collapse
+- Buttons with descriptions, disabled state, confirmation mode, hover/click animation
+- Toggles: `Toggle`, `AlwaysOn`, `KeyToggle`, `Hold`, `Momentary`, `Inverted`, `Disabled`, `ToggleWithBind`
+- Sliders: normal, range, stepped, percentage, float, and locked
+- Dropdowns with single-select, multi-select, search, clear, and option refresh methods
+- Keybind picker with press, release, hold, and toggle modes
+- Text boxes with placeholder, numbers-only, max length, validation, submit/change callbacks
+- Labels, paragraphs, dividers, info/warning/success/error boxes
+- RGB color picker
+- Toast notifications
+- Theme system with `Dark`, `Midnight`, `Light`, `Blue`, `Purple`, `Forest`, and custom tables
+- Adapter-based config export/import/save/load/reset
 
-See [docs/API.md](docs/API.md).
+## Full Demo
 
-## Style
+Use [examples/polished-demo.client.lua](examples/polished-demo.client.lua) to test every major component in Studio.
 
-The UI intentionally looks like a forgotten old web shrine:
+The demo covers:
 
-- framed homepage boxes
-- bright clashing web-safe colors
-- "best viewed on desktop" badge text
-- fake visitor counter
-- under-construction banner energy
-- chunky borders and low-res texture dots
+- Window
+- Tabs
+- Sections
+- Buttons
+- Standard, key, hold, momentary, inverted, and always-on toggles
+- Normal, percentage, float, and range sliders
+- Dropdowns
+- Keybinds
+- Text boxes
+- Color picker
+- Notifications
+- Theme switching
+- Config export/import through a memory adapter
+
+## API Docs
+
+See [docs/POLISHED_API.md](docs/POLISHED_API.md).
+
+## Config Saving
+
+PolishedUI does not hardcode private data or unsafe storage. A normal Roblox ModuleScript cannot save local files by itself, so the library exposes:
+
+```lua
+UI:SetConfigAdapter({
+    Save = function(name, values)
+        return true
+    end,
+    Load = function(name)
+        return {}
+    end,
+    Reset = function(name)
+    end,
+})
+```
+
+Use this adapter to connect your own safe Studio/plugin/project storage layer.
+
+## Still Needs Improvement
+
+- Runtime theme switching updates the core window and tab chrome; existing individual controls keep most of their original colors.
+- The color picker is RGB-only. Hex input and transparency can be added next.
+- Config persistence depends on the adapter you provide for your environment.
 
 ## License
 
